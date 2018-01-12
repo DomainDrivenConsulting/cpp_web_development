@@ -27,7 +27,7 @@ RUN cd /home && \
 #
 # Build and install latest release of Dogen.
 #
-ARG dogen_dot_version=1.0.7
+ARG dogen_dot_version=1.0.07
 RUN cd /home && \
     wget https://github.com/DomainDrivenConsulting/dogen/archive/v${dogen_dot_version}.tar.gz && \
     tar xfz v${dogen_dot_version}.tar.gz && \
