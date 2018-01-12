@@ -92,8 +92,8 @@ RUN cd /home && \
     rm -rf libcutl-1.10.0 && \
     wget https://www.codesynthesis.com/download/odb/2.4/libodb-2.4.0.tar.bz2 && \
     tar xaf libodb-2.4.0.tar.bz2 && \
-    cd libodb-2.4.0
-    ./configure --prefix=/usr
+    cd libodb-2.4.0 && \
+    ./configure --prefix=/usr && \
     make -j3 && \
     make install && \
     cd /home && \
@@ -101,7 +101,7 @@ RUN cd /home && \
     wget https://www.codesynthesis.com/download/odb/2.4/libodb-pgsql-2.4.0.tar.bz2 && \
     tar xaf libodb-pgsql-2.4.0.tar.bz2 && \
     cd libodb-pgsql-2.4.0 && \
-    ./configure --prefix=/usr
+    ./configure --prefix=/usr && \
     make -j3 && \
     make install && \
     cd /home && \
