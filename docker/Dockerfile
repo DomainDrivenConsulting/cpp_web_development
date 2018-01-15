@@ -67,8 +67,8 @@ RUN cd /home && \
     unzip 3584c326a93a994cd329cd7d15d627d9375b678b.zip && \
     cd rtags-3584c326a93a994cd329cd7d15d627d9375b678b/src && \
     wget https://github.com/Andersbakken/rct/archive/b3e6f41d9844ef64420e628e0c65ed98278a843a.zip && \
-    unizp b3e6f41d9844ef64420e628e0c65ed98278a843a.zip && \
-    mv rct-b3e6f41d9844ef64420e628e0c65ed98278a843a rct && \
+    unzip b3e6f41d9844ef64420e628e0c65ed98278a843a.zip && \
+    mv rct-b3e6f41d9844ef64420e628e0c65ed98278a843a/* rct && \
     cd .. && \
     mkdir build && \
     cd build && \
