@@ -1,4 +1,5 @@
 FROM alpine:edge
+MAINTAINER Marco Craveiro (marco.craveiro@gmail.com)
 
 #
 # Install the base packages such as compilers, etc.
@@ -38,7 +39,7 @@ RUN cd /home && \
     make -j3 && \
     make install && \
     cd /home && \
-    rm -rf dogen
+    rm -rf dogen-1.0.07 v1.0.07.tar.gz
 
 #
 # Build and install wt from master. We can't use the released version
@@ -46,29 +47,32 @@ RUN cd /home && \
 #
 #     https://redmine.emweb.be/issues/6199#change-19540
 #
+ARG wt_hash=da3f9de92df90030990e211577e151ea44c3c265
 RUN cd /home && \
-    wget https://github.com/emweb/wt/archive/da3f9de92df90030990e211577e151ea44c3c265.zip && \
-    unzip da3f9de92df90030990e211577e151ea44c3c265.zip && \
-    cd wt-da3f9de92df90030990e211577e151ea44c3c265 && \
+    wget https://github.com/emweb/wt/archive/${wt_hash}.zip && \
+    unzip ${wt_hash}.zip && \
+    cd wt-${wt_hash} && \
     mkdir build && \
     cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && \
     make -j3 && \
     make install && \
     cd /home && \
-    rm -rf wt-da3f9de92df90030990e211577e151ea44c3c265
+    rm -rf wt-${wt_hash} ${wt_hash}.zip
 
 #
 # Bild and install rtags from master. We always want latest rtags
 # becasue there are always lots of fixes.
 #
+ARG rtags_hash=3584c326a93a994cd329cd7d15d627d9375b678b
+ARG rct_hash=b3e6f41d9844ef64420e628e0c65ed98278a843a
 RUN cd /home && \
-    wget https://github.com/Andersbakken/rtags/archive/3584c326a93a994cd329cd7d15d627d9375b678b.zip && \
-    unzip 3584c326a93a994cd329cd7d15d627d9375b678b.zip && \
-    cd rtags-3584c326a93a994cd329cd7d15d627d9375b678b/src && \
-    wget https://github.com/Andersbakken/rct/archive/b3e6f41d9844ef64420e628e0c65ed98278a843a.zip && \
-    unzip b3e6f41d9844ef64420e628e0c65ed98278a843a.zip && \
-    mv rct-b3e6f41d9844ef64420e628e0c65ed98278a843a/* rct && \
+    wget https://github.com/Andersbakken/rtags/archive/${rtags_hash}.zip && \
+    unzip ${rtags_hash}.zip && \
+    cd rtags-${rtags_hash}/src && \
+    wget https://github.com/Andersbakken/rct/archive/${rct_hash}.zip && \
+    unzip ${rct_hash}.zip && \
+    mv rct-${rct_hash}/* rct && \
     cd .. && \
     mkdir build && \
     cd build && \
@@ -76,39 +80,77 @@ RUN cd /home && \
     make -j3 && \
     make install && \
     cd /home && \
-    rm -rf rtags-3584c326a93a994cd329cd7d15d627d9375b678b
+    rm -rf rtags-${rtags_hash} ${rtags_hash}.zip ${rct_hash}.zip
 
 #
 # Build and install ODB
 #
+ARG cutl_dot_partial_version=1.10
+ARG cutl_dot_version=${cutl_dot_partial_version}.0
+ARG odb_dot_partial_version=2.4
+ARG odb_dot_version=${odb_dot_partial_version}.0
 RUN cd /home && \
-    wget https://www.codesynthesis.com/download/libcutl/1.10/libcutl-1.10.0.tar.gz && \
-    tar xaf libcutl-1.10.0.tar.gz && \
-    cd libcutl-1.10.0 && \
+    wget https://www.codesynthesis.com/download/libcutl/${cutl_dot_partial_version}/libcutl-${cutl_dot_version}.tar.gz && \
+    tar xaf libcutl-${cutl_dot_version}.tar.gz && \
+    cd libcutl-${cutl_dot_version} && \
     ./configure --prefix=/usr && \
     make -j3 && \
     make install && \
     cd /home && \
-    rm -rf libcutl-1.10.0 && \
-    wget https://www.codesynthesis.com/download/odb/2.4/libodb-2.4.0.tar.bz2 && \
-    tar xaf libodb-2.4.0.tar.bz2 && \
-    cd libodb-2.4.0 && \
+    rm -rf libcutl-${cutl_dot_version} libcutl-${cutl_dot_version}.tar.gz && \
+    wget https://www.codesynthesis.com/download/odb/${odb_dot_partial_version}/libodb-${odb_dot_version}.tar.bz2 && \
+    tar xaf libodb-${odb_dot_version}.tar.bz2 && \
+    cd libodb-${odb_dot_version} && \
+    ./configure --prefix=/usr && \
+    make -j3 && \
+    make install && \
+    make install && \
+    cd /home && \
+    rm -rf libodb-${odb_dot_version} libodb-${odb_dot_version}.tar.bz2 && \
+    wget https://www.codesynthesis.com/download/odb/${odb_dot_partial_version}/libodb-pgsql-${odb_dot_version}.tar.bz2 && \
+    tar xaf libodb-pgsql-${odb_dot_version}.tar.bz2 && \
+    cd libodb-pgsql-${odb_dot_version} && \
     ./configure --prefix=/usr && \
     make -j3 && \
     make install && \
     cd /home && \
-    rm -rf libodb-2.4.0 && \
-    wget https://www.codesynthesis.com/download/odb/2.4/libodb-pgsql-2.4.0.tar.bz2 && \
-    tar xaf libodb-pgsql-2.4.0.tar.bz2 && \
-    cd libodb-pgsql-2.4.0 && \
-    ./configure --prefix=/usr && \
+    rm -rf libodb-pgsql-${odb_dot_version} libodb-pgsql-${odb_dot_version}.tar.bz2
+
+#
+# Build and install Crypto++
+#
+ARG cryptopp_hash=c621ce053298fafc1e59191079c33acd76045c26
+RUN cd /home && \
+    wget https://github.com/weidai11/cryptopp/archive/${cryptopp_hash}.zip && \
+    unzip ${cryptopp_hash}.zip && \
+    cd cryptopp-${cryptopp_hash} && \
     make -j3 && \
     make install && \
     cd /home && \
-    rm -rf libodb-pgsql-2.4.0
+    rm -rf cryptopp-${cryptopp_hash} ${cryptopp_hash}.zip
+
+#
+# Build and install Ranges
+#
+ARG ranges_hash=4ade4af033cf27f46504dc462b27daa3b425eb00
+RUN cd /home && \
+    wget https://github.com/ericniebler/range-v3/archive/${ranges_hash}.zip && \
+    unzip ${ranges_hash}.zip && \
+    cd range-v3-${ranges_hash} && \
+    mkdir build && \
+    cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr .. && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf range-v3-${ranges_hash} ${ranges_hash}.zip
+
+#
+# Add sudo
+#
+RUN apk --no-cache add sudo
 
 COPY user-mapping.sh /usr/bin
 RUN chmod u+x /usr/bin/user-mapping.sh
 
 ENTRYPOINT ["/usr/bin/user-mapping.sh"]
-MAINTAINER Marco Craveiro (marco.craveiro@gmail.com)
