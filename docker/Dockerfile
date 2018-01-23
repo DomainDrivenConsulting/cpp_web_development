@@ -134,6 +134,11 @@ RUN cd /home && \
 #
 # Build and install QuantLib
 #
+# Copying the config (last step) is a hack, as explained in this
+# ticket:
+#
+# https://github.com/lballabio/QuantLib/issues/396
+#
 ARG quantlib_hash=a00d43fabf30ab1e7fcaeaa9f497a551b0de528c
 RUN cd /home && \
     wget https://github.com/lballabio/QuantLib/archive/${quantlib_hash}.zip && \
@@ -145,7 +150,8 @@ RUN cd /home && \
     make -j3 && \
     make install && \
     cd /home && \
-    rm -rf QuantLib-${quantlib_hash} ${quantlib_hash}.zip
+    rm -rf QuantLib-${quantlib_hash} ${quantlib_hash}.zip && \
+    cp /usr/include/ql/config.ansi.hpp /usr/include/ql/config.hpp
 
 #
 # Build and install RapidXML
