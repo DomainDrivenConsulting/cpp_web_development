@@ -10,6 +10,8 @@ RUN apk update && \
                        clang cmake make git g++ gcc gdb ninja tar wget linux-headers \
                        libxml2-dev llvm-dev clang-dev gmp-dev postgresql-dev
 
+arg cmake_build_type=MinSizeRel
+
 #
 # Build and install boost
 #
@@ -21,25 +23,9 @@ RUN cd /home && \
     rm boost_${boost_us_version}.tar.gz && \
     cd boost_${boost_us_version} && \
     ./bootstrap.sh --prefix=/usr && \
-    ./b2 install && \
+    ./b2 variant=release link=static,shared threading=multi install && \
     cd /home && \
     rm -rf boost_${boost_us_version}
-
-#
-# Build and install latest release of Dogen.
-#
-ARG dogen_dot_version=1.0.07
-RUN cd /home && \
-    wget https://github.com/DomainDrivenConsulting/dogen/archive/v${dogen_dot_version}.tar.gz && \
-    tar xfz v${dogen_dot_version}.tar.gz && \
-    cd dogen-${dogen_dot_version}/build && \
-    mkdir output && \
-    cd output && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr ../.. && \
-    make -j3 && \
-    make install && \
-    cd /home && \
-    rm -rf dogen-1.0.07 v1.0.07.tar.gz
 
 #
 # Build and install wt from master. We can't use the released version
@@ -54,7 +40,7 @@ RUN cd /home && \
     cd wt-${wt_hash} && \
     mkdir build && \
     cd build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr .. && \
+    cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr .. && \
     make -j3 && \
     make install && \
     cd /home && \
@@ -76,7 +62,7 @@ RUN cd /home && \
     cd .. && \
     mkdir build && \
     cd build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr .. && \
+    cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr .. && \
     make -j3 && \
     make install && \
     cd /home && \
@@ -124,8 +110,8 @@ RUN cd /home && \
     wget https://github.com/weidai11/cryptopp/archive/${cryptopp_hash}.zip && \
     unzip ${cryptopp_hash}.zip && \
     cd cryptopp-${cryptopp_hash} && \
-    make -j3 && \
-    make install && \
+    make -j3 static dynamic && \
+    make install PREFIX=/usr && \
     cd /home && \
     rm -rf cryptopp-${cryptopp_hash} ${cryptopp_hash}.zip
 
@@ -139,11 +125,105 @@ RUN cd /home && \
     cd range-v3-${ranges_hash} && \
     mkdir build && \
     cd build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr .. && \
+    cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr .. && \
     make -j3 && \
     make install && \
     cd /home && \
     rm -rf range-v3-${ranges_hash} ${ranges_hash}.zip
+
+#
+# Build and install QuantLib
+#
+ARG quantlib_hash=a00d43fabf30ab1e7fcaeaa9f497a551b0de528c
+RUN cd /home && \
+    wget https://github.com/lballabio/QuantLib/archive/${quantlib_hash}.zip && \
+    unzip ${quantlib_hash}.zip && \
+    cd QuantLib-${quantlib_hash} && \
+    mkdir build && \
+    cd build && \
+    cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr .. && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf QuantLib-${quantlib_hash} ${quantlib_hash}.zip
+
+#
+# Build and install RapidXML
+#
+ARG rapidxml_hash=3ade9030f73b03bd648383da0ea0402b92da4e97
+RUN cd /home && \
+    wget https://github.com/timniederhausen/rapidxml/archive/${rapidxml_hash}.zip && \
+    unzip ${rapidxml_hash}.zip && \
+    cd rapidxml-${rapidxml_hash} && \
+    mkdir build && \
+    cd build && \
+    cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr .. && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf rapidxml-${rapidxml_hash} ${rapidxml_hash}.zip
+
+#
+# Build and install RapidJSON
+#
+# NOTE: borked at present: https://github.com/Tencent/rapidjson/issues/1164
+#
+# ARG rapidjson_hash=fc7cda78a9b25e986f245ed0655df0aa4b71bc3b
+# RUN cd /home && \
+#     wget https://github.com/Tencent/rapidjson/archive/${rapidjson_hash}.zip && \
+#     unzip ${rapidjson_hash}.zip && \
+#     cd rapidjson-${rapidjson_hash} && \
+#     mkdir build && \
+#     cd build && \
+#     cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr .. && \
+#     make -j3 && \
+#     make install && \
+#     cd /home && \
+#     rm -rf rapidjson-${rapidjson_hash} ${rapidjson_hash}.zip
+
+#
+# Build and install OpenSourceRiskEngine
+#
+RUN apk --no-cache add autoconf automake libtool
+ARG osre_hash=2a56688ff4d91e378bf88620a45864824150fbc5
+RUN cd /home && \
+    wget https://github.com/OpenSourceRisk/Engine/archive/${osre_hash}.zip && \
+    unzip ${osre_hash}.zip && \
+    cd Engine-${osre_hash} && \
+    cd QuantExt && \
+    ./autogen.sh && \
+    ./configure PREFIX=/usr && \
+    make -j3 && \
+    make install && \
+    cd ../OREAnalytics && \
+    ./autogen.sh && \
+    ./configure PREFIX=/usr && \
+    make -j3 && \
+    make install && \
+    cd ../OREData && \
+    ./autogen.sh && \
+    ./configure PREFIX=/usr && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf Engine-${osre_hash} ${osre_hash}.zip
+
+#
+# Build and install latest release of Dogen. Must be the last layer
+# since we update it very frequently.
+#
+ARG dogen_dot_version=1.0.07
+RUN cd /home && \
+    wget https://github.com/DomainDrivenConsulting/dogen/archive/v${dogen_dot_version}.tar.gz && \
+    tar xfz v${dogen_dot_version}.tar.gz && \
+    cd dogen-${dogen_dot_version}/build && \
+    mkdir output && \
+    cd output && \
+    cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr ../.. && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf dogen-1.0.07 v1.0.07.tar.gz
 
 #
 # Add sudo
