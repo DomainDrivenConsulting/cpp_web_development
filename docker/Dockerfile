@@ -224,6 +224,55 @@ RUN cd /home && \
     rm -rf Engine-${osre_hash} ${osre_hash}.zip
 
 #
+# Build and install Catch
+#
+ARG catch_hash=b97e9a2f8b3547ff0434aa97103c68faede6edbe
+RUN cd /home && \
+    wget https://github.com/catchorg/Catch2/archive/${catch_hash}.zip && \
+    unzip ${catch_hash}.zip && \
+    cd Catch2-${catch_hash} && \
+    mkdir build && \
+    cd build && \
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/usr .. && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf Catch2-${catch_hash} ${catch_hash}.zip
+
+#
+# Build and install Catch2
+#
+ARG catch2_hash=a1aefce6e45f30d292dc82a8e1b16c025219985c
+    RUN cd /home && \
+    wget https://github.com/catchorg/Catch2/archive/${catch2_hash}.zip && \
+    unzip ${catch2_hash}.zip && \
+    cd Catch2-${catch2_hash} && \
+    mkdir build && \
+    cd build && \
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/usr .. && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf Catch2-${catch2_hash} ${catch2_hash}.zip
+
+#
+# Build and install Rx
+#
+ARG rxcpp_hash=b84db4278e54e722fbbae794f573d1142261e9a3
+RUN cd /home && \
+    wget https://github.com/Reactive-Extensions/RxCpp/archive/${rxcpp_hash}.zip && \
+    unzip ${rxcpp_hash}.zip && \
+    cd RxCpp-${rxcpp_hash} && \
+    cp /usr/include/catch/catch.hpp Rx/v2/test/ && \
+    mkdir projects/build && \
+    cd projects/build && \
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/usr -B. ../CMake && \
+    make -j1 && \
+    make install && \
+    cd /home && \
+    rm -rf RxCpp-${rxcpp_hash} ${rxcpp_hash}.zip
+
+#
 # Build and install latest release of Dogen. Must be the last layer
 # since we update it very frequently.
 #
