@@ -161,31 +161,32 @@ RUN cd /home && \
     wget https://github.com/timniederhausen/rapidxml/archive/${rapidxml_hash}.zip && \
     unzip ${rapidxml_hash}.zip && \
     cd rapidxml-${rapidxml_hash} && \
-    mkdir build && \
-    cd build && \
-    cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr .. && \
-    make -j3 && \
-    make install && \
+    mkdir /usr/include/rapidxml && \
+    cp rapidxml.hpp rapidxml_iterators.hpp rapidxml_print.hpp rapidxml_utils.hpp /usr/include/rapidxml/ && \
     cd /home && \
     rm -rf rapidxml-${rapidxml_hash} ${rapidxml_hash}.zip
 
 #
 # Build and install RapidJSON
 #
-# NOTE: borked at present: https://github.com/Tencent/rapidjson/issues/1164
+# NOTE: regular build borked at present, so disabling tests etc. See:
 #
-# ARG rapidjson_hash=fc7cda78a9b25e986f245ed0655df0aa4b71bc3b
-# RUN cd /home && \
-#     wget https://github.com/Tencent/rapidjson/archive/${rapidjson_hash}.zip && \
-#     unzip ${rapidjson_hash}.zip && \
-#     cd rapidjson-${rapidjson_hash} && \
-#     mkdir build && \
-#     cd build && \
-#     cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr .. && \
-#     make -j3 && \
-#     make install && \
-#     cd /home && \
-#     rm -rf rapidjson-${rapidjson_hash} ${rapidjson_hash}.zip
+#     https://github.com/Tencent/rapidjson/issues/1164
+#
+ARG rapidjson_hash=fc7cda78a9b25e986f245ed0655df0aa4b71bc3b
+RUN cd /home && \
+    wget https://github.com/Tencent/rapidjson/archive/${rapidjson_hash}.zip && \
+    unzip ${rapidjson_hash}.zip && \
+    cd rapidjson-${rapidjson_hash} && \
+    mkdir build && \
+    cd build && \
+    cmake -DCMAKE_BUILD_TYPE=${cmake_build_type} -DCMAKE_INSTALL_PREFIX=/usr \
+          -DRAPIDJSON_BUILD_DOC=off -DRAPIDJSON_BUILD_EXAMPLES=off \
+          -DRAPIDJSON_BUILD_TESTS=off -DRAPIDJSON_BUILD_THIRDPARTY_GTEST=off .. && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf rapidjson-${rapidjson_hash} ${rapidjson_hash}.zip
 
 #
 # Build and install OpenSourceRiskEngine
@@ -198,17 +199,25 @@ RUN cd /home && \
     cd Engine-${osre_hash} && \
     cd QuantExt && \
     ./autogen.sh && \
-    ./configure PREFIX=/usr && \
+    ./configure --prefix=/usr && \
+    cd qle && \
     make -j3 && \
     make install && \
-    cd ../OREAnalytics && \
+    cd ../../OREData && \
     ./autogen.sh && \
-    ./configure PREFIX=/usr && \
+    ./configure --prefix=/usr && \
+    cd ored && \
     make -j3 && \
     make install && \
-    cd ../OREData && \
+    cd ../../OREAnalytics && \
     ./autogen.sh && \
-    ./configure PREFIX=/usr && \
+    ./configure --prefix=/usr && \
+    cd orea && \
+    make -j3 && \
+    make install && \
+    cd ../../App && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr && \
     make -j3 && \
     make install && \
     cd /home && \
