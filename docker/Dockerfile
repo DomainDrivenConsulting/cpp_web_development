@@ -264,6 +264,7 @@ RUN cd /home && \
     unzip ${rxcpp_hash}.zip && \
     cd RxCpp-${rxcpp_hash} && \
     cp /usr/include/catch/catch.hpp Rx/v2/test/ && \
+    cp /usr/include/catch/catch.hpp Rx/v2/examples/tests/ && \
     mkdir projects/build && \
     cd projects/build && \
     cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/usr -B. ../CMake && \
