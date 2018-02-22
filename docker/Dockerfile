@@ -100,7 +100,16 @@ RUN cd /home && \
     make -j3 && \
     make install && \
     cd /home && \
-    rm -rf libodb-pgsql-${odb_dot_version} libodb-pgsql-${odb_dot_version}.tar.bz2
+    rm -rf libodb-pgsql-${odb_dot_version} libodb-pgsql-${odb_dot_version}.tar.bz2 && \
+    cd /home && \
+    wget https://www.codesynthesis.com/download/odb/${odb_dot_partial_version}/libodb-boost-${odb_dot_version}.tar.bz2 && \
+    tar xaf libodb-boost-${odb_dot_version}.tar.bz2 && \
+    cd libodb-boost-${odb_dot_version} && \
+    ./configure --prefix=/usr && \
+    make -j3 && \
+    make install && \
+    cd /home && \
+    rm -rf libodb-boost-${odb_dot_version} libodb-boost-${odb_dot_version}.tar.bz2
 
 #
 # Build and install Crypto++
