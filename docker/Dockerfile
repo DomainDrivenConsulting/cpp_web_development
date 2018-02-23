@@ -90,7 +90,6 @@ RUN cd /home && \
     ./configure --prefix=/usr && \
     make -j3 && \
     make install && \
-    make install && \
     cd /home && \
     rm -rf libodb-${odb_dot_version} libodb-${odb_dot_version}.tar.bz2 && \
     wget https://www.codesynthesis.com/download/odb/${odb_dot_partial_version}/libodb-pgsql-${odb_dot_version}.tar.bz2 && \
